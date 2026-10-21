@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Misi Robot | Robot Mission - Kindy Klub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap');
+
+    :root {
+      --bg-dark-midnight: #0b0d19;
+      --bg-deep-indigo: #12152b;
+      --panel-gloss: rgba(22, 24, 48, 0.94);
+      --panel-border: rgba(147, 130, 255, 0.28);
+      --accent-lavender: #a78bfa;
+      --accent-electric-purple: #8b5cf6;
+      --accent-pink: #f472b6;
+      --accent-cyan: #38bdf8;
+      --accent-gold: #fbbf24;
+      --accent-coral: #fb7185;
+      --text-cream: #fdfaf3;
+      --text-soft: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka', 'Nunito', system-ui, sans-serif;
+      background-color: var(--bg-dark-midnight);
+      color: var(--text-cream);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .btn-3d {
+      position: relative;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+      border-radius: 1.25rem;
+      transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.08s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 6px 0 var(--btn-shadow, #312e81), 0 10px 18px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, var(--btn-top, #6366f1) 0%, var(--btn-bottom, #4338ca) 100%);
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      min-height: 48px;
+    }
+
+    .btn-3d::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 6px;
+      right: 6px;
+      height: 38%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.04) 100%);
+      border-radius: 1rem 1rem 0.5rem 0.5rem;
+      pointer-events: none;
+    }
+
+    .btn-3d:active, .btn-3d.active-press {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 var(--btn-shadow, #312e81), 0 4px 8px rgba(0, 0, 0, 0.4);
+      filter: brightness(1.08);
+    }
+
+    .btn-play {
+      --btn-top: #f59e0b;
+      --btn-bottom: #d97706;
+      --btn-shadow: #78350f;
+    }
+
+    .btn-action-cyan {
+      --btn-top: #38bdf8;
+      --btn-bottom: #0284c7;
+      --btn-shadow: #0369a1;
+    }
+
+    .btn-action-purple {
+      --btn-top: #a855f7;
+      --btn-bottom: #7e22ce;
+      --btn-shadow: #581c87;
+    }
+
+    .btn-action-amber {
+      --btn-top: #fbbf24;
+      --btn-bottom: #b45309;
+      --btn-shadow: #78350f;
+    }
+
+    .btn-action-pink {
+      --btn-top: #ec4899;
+      --btn-bottom: #be185d;
+      --btn-shadow: #831843;
+    }
+
+    .btn-dark-pill {
+      --btn-top: #2a2e4a;
+      --btn-bottom: #1b1e36;
+      --btn-shadow: #0f1122;
+      border: 1px solid rgba(167, 139, 250, 0.28);
+    }
+
+    .glass-diorama-panel {
+      background: radial-gradient(120% 120% at 50% 0%, rgba(30, 34, 65, 0.94) 0%, rgba(14, 16, 32, 0.97) 100%);
+      border: 1.5px solid rgba(167, 139, 250, 0.28);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.25), inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      border-radius: 1.5rem;
+    }
+
+    .command-token {
+      position: relative;
+      border-radius: 1rem;
+      padding: 0.35rem 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      font-weight: 700;
+      font-size: 0.82rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      animation: tokenPop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      min-width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+
+    @keyframes tokenPop {
+      0% { transform: scale(0.6) translateY(8px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    @keyframes beaconGlow {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.7)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 16px rgba(251, 191, 36, 1)); transform: scale(1.06); }
+    }
+
+    @keyframes starFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(4deg); }
+    }
+
+    .animated-beacon {
+      animation: beaconGlow 2.4s ease-in-out infinite;
+    }
+
+    .star-float {
+      animation: starFloat 3s ease-in-out infinite;
+    }
+
+    #world-viewport {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #080914;
+      touch-action: none;
+    }
+
+    #world-stage {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2400px;
+      height: 1400px;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    .smooth-cam {
+      transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="relative">
+
+  <div id="world-viewport" class="flex-1 w-full h-full relative cursor-grab active:cursor-grabbing">
+    <div id="world-stage" class="smooth-cam">
+      <svg id="game-svg-canvas" viewBox="0 0 2400 1400" width="2400" height="1400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#070913" />
+            <stop offset="50%" stop-color="#11132c" />
+            <stop offset="100%" stop-color="#181938" />
+          </linearGradient>
+
+          <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fef08a" stop-opacity="1" />
+            <stop offset="40%" stop-color="#fef08a" stop-opacity="0.5" />
+            <stop offset="100%" stop-color="#a78bfa" stop-opacity="0" />
+          </radialGradient>
+
+          <linearGradient id="hillBackGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1e1b4b" />
+            <stop offset="100%" stop-color="#0f172a" />
+          </linearGradient>
+
+          <linearGradient id="hillMidGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2e1065" />
+            <stop offset="100%" stop-color="#1e1b4b" />
+          </linearGradient>
+
+          <linearGradient id="tileTopGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2d315f" />
+            <stop offset="50%" stop-color="#222549" />
+            <stop offset="100%" stop-color="#191b35" />
+          </linearGradient>
+
+          <linearGradient id="tileSideGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#15172b" />
+            <stop offset="100%" stop-color="#0c0d18" />
+          </linearGradient>
+
+          <linearGradient id="pathGlowGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3" />
+            <stop offset="50%" stop-color="#c084fc" stop-opacity="0.75" />
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.3" />
+          </linearGradient>
+
+          <linearGradient id="goldStarGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="40%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#b45309" />
+          </linearGradient>
+
+          <linearGradient id="houseRoofGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ec4899" />
+            <stop offset="100%" stop-color="#9d174d" />
+          </linearGradient>
+
+          <linearGradient id="houseWallGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#312e81" />
+            <stop offset="100%" stop-color="#1e1b4b" />
+          </linearGradient>
+
+          <radialGradient id="windowGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="80%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#b45309" />
+          </radialGradient>
+
+          <!-- Flower & Battery Item Gradients -->
+          <linearGradient id="flowerPetalGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f472b6" />
+            <stop offset="60%" stop-color="#ec4899" />
+            <stop offset="100%" stop-color="#a855f7" />
+          </linearGradient>
+
+          <linearGradient id="batteryGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8" />
+            <stop offset="70%" stop-color="#0284c7" />
+            <stop offset="100%" stop-color="#1e1b4b" />
+          </linearGradient>
+
+          <filter id="glowFilter" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Night Sky, Moon and Twinkling Stars -->
+        <rect x="0" y="0" width="2400" height="1400" fill="url(#skyGrad)" />
+        <circle cx="1950" cy="240" r="140" fill="url(#moonGlow)" opacity="0.6" />
+        <circle cx="1950" cy="240" r="70" fill="#fef9c3" />
+        <circle cx="1980" cy="220" r="62" fill="#12152b" />
+
+        <g id="stars-layer">
+          <circle cx="280" cy="180" r="3.5" fill="#fef08a"><animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite" /></circle>
+          <circle cx="450" cy="90" r="2.5" fill="#a78bfa"><animate attributeName="opacity" values="0.8;0.2;0.8" dur="4s" repeatCount="indefinite" /></circle>
+          <circle cx="780" cy="220" r="4" fill="#38bdf8"><animate attributeName="opacity" values="0.2;0.9;0.2" dur="2.8s" repeatCount="indefinite" /></circle>
+          <circle cx="1120" cy="130" r="3" fill="#f472b6"><animate attributeName="opacity" values="0.4;1;0.4" dur="3.5s" repeatCount="indefinite" /></circle>
+          <circle cx="1480" cy="190" r="4.5" fill="#fef08a"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="4.2s" repeatCount="indefinite" /></circle>
+          <circle cx="1720" cy="95" r="2.5" fill="#38bdf8"><animate attributeName="opacity" values="0.3;1;0.3" dur="3.1s" repeatCount="indefinite" /></circle>
+          <circle cx="2200" cy="160" r="3.5" fill="#c084fc"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.8s" repeatCount="indefinite" /></circle>
+        </g>
+
+        <!-- Diorama Mountain Silhouettes -->
+        <path d="M-100,680 Q320,380 750,620 T1600,580 T2500,650 L2500,1400 L-100,1400 Z" fill="url(#hillBackGrad)" opacity="0.7" />
+        <path d="M-50,750 Q480,480 1020,720 T1920,680 T2500,760 L2500,1400 L-50,1400 Z" fill="url(#hillMidGrad)" opacity="0.9" />
+
+        <!-- Dynamic Grid Pathways & Ground Stepping Stones -->
+        <g id="world-paths-layer"></g>
+        <g id="world-playfield-tiles"></g>
+
+        <!-- Environment Scenery Props -->
+        <g id="scenery-props">
+          <g id="prop-observatory" transform="translate(1680, 520)">
+            <ellipse cx="90" cy="180" rx="100" ry="32" fill="#090a14" opacity="0.6" />
+            <rect x="20" y="70" width="140" height="110" rx="24" fill="url(#houseWallGrad)" stroke="rgba(167, 139, 250, 0.4)" stroke-width="3" />
+            <path d="M20,80 C20,-10 160,-10 160,80 Z" fill="url(#houseRoofGrad)" stroke="rgba(244, 114, 182, 0.6)" stroke-width="3" />
+            <circle cx="90" cy="120" r="26" fill="url(#windowGlow)" stroke="#fef08a" stroke-width="4" filter="url(#glowFilter)" />
+            <rect x="100" y="20" width="60" height="14" rx="6" fill="#fbbf24" transform="rotate(-32 100 20)" stroke="#b45309" stroke-width="2" />
+          </g>
+
+          <g id="prop-workshop" transform="translate(300, 640)">
+            <ellipse cx="80" cy="170" rx="90" ry="28" fill="#090a14" opacity="0.6" />
+            <rect x="15" y="65" width="130" height="100" rx="20" fill="url(#houseWallGrad)" stroke="rgba(167, 139, 250, 0.4)" stroke-width="3" />
+            <polygon points="80,10 5,75 155,75" fill="url(#houseRoofGrad)" stroke="rgba(244, 114, 182, 0.6)" stroke-width="3" />
+            <path d="M55,165 L55,110 Q80,95 105,110 L105,165 Z" fill="url(#windowGlow)" stroke="#fef08a" stroke-width="3" />
+          </g>
+
+          <g transform="translate(220, 880)">
+            <ellipse cx="50" cy="110" rx="40" ry="14" fill="#090a14" opacity="0.5" />
+            <rect x="42" y="55" width="16" height="55" rx="8" fill="#312e81" />
+            <circle cx="50" cy="45" r="38" fill="#38bdf8" opacity="0.85" filter="url(#glowFilter)">
+              <animate attributeName="r" values="38;42;38" dur="3s" repeatCount="indefinite" />
+            </circle>
+          </g>
+
+          <g transform="translate(1960, 820)">
+            <ellipse cx="50" cy="110" rx="40" ry="14" fill="#090a14" opacity="0.5" />
+            <rect x="42" y="55" width="16" height="55" rx="8" fill="#312e81" />
+            <circle cx="50" cy="45" r="42" fill="#ec4899" opacity="0.85" filter="url(#glowFilter)">
+              <animate attributeName="r" values="42;46;42" dur="3.6s" repeatCount="indefinite" />
+            </circle>
+          </g>
+        </g>
+
+        <g id="mission-elements-layer"></g>
+
+        <!-- Hero Robot Bobi -->
+        <g id="robot-hero-group" transform="translate(800, 750)">
+          <ellipse id="robot-shadow" cx="0" cy="38" rx="46" ry="16" fill="#05060d" opacity="0.75" />
+
+          <g id="robot-body-wrapper">
+            <!-- Left Foot -->
+            <g id="robot-foot-left" transform="translate(-22, 28)">
+              <rect x="-14" y="-8" width="28" height="18" rx="9" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2.5" />
+              <circle cx="0" cy="1" r="4" fill="#38bdf8" />
+            </g>
+
+            <!-- Right Foot -->
+            <g id="robot-foot-right" transform="translate(22, 28)">
+              <rect x="-14" y="-8" width="28" height="18" rx="9" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2.5" />
+              <circle cx="0" cy="1" r="4" fill="#38bdf8" />
+            </g>
+
+            <!-- Torso -->
+            <g id="robot-torso">
+              <ellipse cx="0" cy="8" rx="36" ry="30" fill="url(#skyGrad)" stroke="#a78bfa" stroke-width="3" />
+              <circle cx="0" cy="10" r="12" fill="#064e3b" stroke="#34d399" stroke-width="2" />
+              <polygon points="0,5 6,10 0,16 -6,10" fill="#38bdf8" filter="url(#glowFilter)">
+                <animate attributeName="opacity" values="0.7;1;0.7" dur="1.5s" repeatCount="indefinite" />
+              </polygon>
+            </g>
+
+            <!-- Arms -->
+            <g id="robot-arm-left" transform="translate(-38, 4)">
+              <rect x="-8" y="-6" width="16" height="24" rx="8" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2" />
+              <circle cx="0" cy="18" r="7" fill="#fbbf24" />
+            </g>
+            <g id="robot-arm-right" transform="translate(38, 4)">
+              <rect x="-8" y="-6" width="16" height="24" rx="8" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2" />
+              <circle cx="0" cy="18" r="7" fill="#fbbf24" />
+            </g>
+
+            <!-- Carried Star Item -->
+            <g id="robot-carried-item" transform="translate(0, -50)" style="display: none;">
+              <!-- Dynamic Carried Graphic rendered by JS -->
+            </g>
+
+            <!-- Expressive Head with Glowing Eyes and Antenna -->
+            <g id="robot-head" transform="translate(0, -32)">
+              <path d="M0,-36 L0,-54" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" />
+              <circle cx="0" cy="-58" r="9" fill="#fbbf24" stroke="#fef08a" stroke-width="2" filter="url(#glowFilter)">
+                <animate attributeName="r" values="9;11;9" dur="1.8s" repeatCount="indefinite" />
+              </circle>
+              <rect x="-46" y="-36" width="92" height="68" rx="30" fill="#1e1b4b" stroke="#c084fc" stroke-width="3.5" />
+              <path d="M-36,-26 Q0,-34 36,-26" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round" />
+              <rect x="-36" y="-22" width="72" height="46" rx="18" fill="#090a16" stroke="#4338ca" stroke-width="2" />
+
+              <g id="robot-eye-left">
+                <ellipse cx="-16" cy="0" rx="9" ry="12" fill="#38bdf8" filter="url(#glowFilter)" />
+                <circle id="robot-pupil-left" cx="-14" cy="-3" r="3.5" fill="#ffffff" />
+              </g>
+              <g id="robot-eye-right">
+                <ellipse cx="16" cy="0" rx="9" ry="12" fill="#38bdf8" filter="url(#glowFilter)" />
+                <circle id="robot-pupil-right" cx="18" cy="-3" r="3.5" fill="#ffffff" />
+              </g>
+
+              <ellipse cx="-26" cy="14" rx="6" ry="3" fill="#f472b6" opacity="0.6" />
+              <ellipse cx="26" cy="14" rx="6" ry="3" fill="#f472b6" opacity="0.6" />
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Top HUD Header -->
+    <header class="absolute top-0 left-0 right-0 p-3 sm:p-4 pointer-events-none flex items-center justify-between z-30">
+      <div id="hud-mission-badge" class="pointer-events-auto glass-diorama-panel px-3.5 py-2 flex items-center gap-2.5 sm:gap-3 transition-all duration-300 max-w-[70%] sm:max-w-md shadow-lg">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-950/80 border border-purple-500/40 flex items-center justify-center text-amber-300 shrink-0 shadow-inner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <div class="overflow-hidden">
+          <span id="hud-mission-type" class="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-purple-300 block leading-tight">Misi Semasa</span>
+          <span id="hud-mission-text" class="text-xs sm:text-sm font-bold text-amber-200 truncate block leading-snug">Hantar bintang ke rumah!</span>
+        </div>
+      </div>
+
+      <div class="pointer-events-auto flex items-center gap-1.5 sm:gap-3">
+        <!-- Language Switcher -->
+        <button id="btn-toggle-lang" class="btn-3d btn-dark-pill px-2.5 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-1" aria-label="Tukar Bahasa / Change Language">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span id="label-curr-lang">BM</span>
+        </button>
+
+        <!-- Sound Toggle -->
+        <button id="btn-toggle-audio" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl flex items-center justify-center p-0" aria-label="Bunyi Audio / Sound Effects">
+          <svg id="icon-sound-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="icon-sound-off" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          </svg>
+        </button>
+
+        <!-- Profile Button -->
+        <button id="btn-open-profile" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl flex items-center justify-center p-0 text-purple-300" aria-label="Profil Pemain / Player Profile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+
+        <!-- Instructions Button -->
+        <button id="btn-open-help" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl flex items-center justify-center p-0 text-pink-300" aria-label="Cara Main / Instructions">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Camera Control Bar on Right (Fit All, Focus Bobi, Zoom In, Zoom Out) -->
+    <div id="floating-camera-controls" class="absolute right-3 sm:right-4 top-20 sm:top-24 flex flex-col gap-2 z-30 pointer-events-auto">
+      <!-- 1. Fit All / Overview Button (Lihat Semua) -->
+      <button id="btn-cam-fit" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl p-0 flex items-center justify-center text-cyan-300 shadow-xl" title="Lihat Semua Peta / Overview Map" aria-label="Lihat Semua">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+
+      <!-- 2. Focus Robot Button (Fokus Robot) -->
+      <button id="btn-cam-focus" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl p-0 flex items-center justify-center text-purple-300 shadow-xl" title="Fokus Pada Robot / Focus on Bobi" aria-label="Fokus Robot">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="4"></rect>
+          <circle cx="9" cy="10" r="1.5" fill="currentColor"></circle>
+          <circle cx="15" cy="10" r="1.5" fill="currentColor"></circle>
+          <line x1="12" y1="4" x2="12" y2="2"></line>
+          <circle cx="12" cy="1.5" r="1" fill="currentColor"></circle>
+        </svg>
+      </button>
+
+      <!-- 3. Zoom In (+) -->
+      <button id="btn-cam-zoom-in" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl p-0 flex items-center justify-center text-amber-300 shadow-xl" title="Zum Masuk / Zoom In" aria-label="Zum Masuk">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+
+      <!-- 4. Zoom Out (-) -->
+      <button id="btn-cam-zoom-out" class="btn-3d btn-dark-pill w-10 h-10 sm:w-11 sm:h-11 !rounded-2xl p-0 flex items-center justify-center text-pink-300 shadow-xl" title="Zum Keluar / Zoom Out" aria-label="Zum Keluar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Bottom Coding Tray -->
+    <div id="coding-tray-container" class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl pointer-events-auto z-20 transition-all duration-500 ease-out">
+      <div class="glass-diorama-panel p-2.5 sm:p-4 flex flex-col gap-2">
+        <!-- Queue & Execute Strip -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex-1 flex items-center gap-1.5 overflow-x-auto py-1 px-2 rounded-xl bg-black/40 border border-purple-500/20 min-h-[50px] sm:min-h-[54px]" id="command-queue-display">
+            <span id="queue-placeholder-text" class="text-xs sm:text-sm text-slate-400 font-semibold italic pl-1">
+              Pilih anak panah di bawah...
+            </span>
+          </div>
+
+          <button id="btn-clear-queue" class="btn-3d btn-dark-pill px-3 py-2 text-xs font-bold text-coral-300 min-h-[44px]" title="Padam Arahan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span class="hidden sm:inline" data-i18n="cmdClear">Padam</span>
+          </button>
+
+          <button id="btn-play-run" class="btn-3d btn-play px-5 sm:px-7 py-2.5 text-base sm:text-lg font-black tracking-wide" aria-label="Mainkan Arahan / Play Commands">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span data-i18n="btnPlay">Mainkan</span>
+          </button>
+        </div>
+
+        <!-- 6 Direct Action Controls: 4 Arrow-Only Directional Buttons + Pick/Deliver -->
+        <div class="grid grid-cols-6 gap-1.5 sm:gap-2 pt-0.5">
+          <!-- 1. Atas / Up Arrow -->
+          <button class="btn-3d btn-action-cyan cmd-btn !p-2 flex items-center justify-center" data-command="up" title="Atas" aria-label="Atas">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          </button>
+
+          <!-- 2. Bawah / Down Arrow -->
+          <button class="btn-3d btn-action-cyan cmd-btn !p-2 flex items-center justify-center" data-command="down" title="Bawah" aria-label="Bawah">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="5 12 12 19 19 12"></polyline>
+            </svg>
+          </button>
+
+          <!-- 3. Kiri / Left Arrow -->
+          <button class="btn-3d btn-action-purple cmd-btn !p-2 flex items-center justify-center" data-command="left" title="Kiri" aria-label="Kiri">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+
+          <!-- 4. Kanan / Right Arrow -->
+          <button class="btn-3d btn-action-purple cmd-btn !p-2 flex items-center justify-center" data-command="right" title="Kanan" aria-label="Kanan">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+
+          <!-- 5. Ambil / Pick Up -->
+          <button class="btn-3d btn-action-amber cmd-btn flex-col sm:flex-row !p-1 sm:!p-2" data-command="pickup" title="Ambil" aria-label="Ambil">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+            <span class="text-[10px] sm:text-xs font-bold" data-i18n="cmdPickup">Ambil</span>
+          </button>
+
+          <!-- 6. Hantar / Deliver -->
+          <button class="btn-3d btn-action-pink cmd-btn flex-col sm:flex-row !p-1 sm:!p-2" data-command="deliver" title="Hantar" aria-label="Hantar">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span class="text-[10px] sm:text-xs font-bold" data-i18n="cmdDeliver">Hantar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speech Guidance Bubble for gentle wrong route hint -->
+    <div id="robot-hint-bubble" class="absolute pointer-events-none opacity-0 transition-all duration-300 -translate-y-2 z-20">
+      <div class="glass-diorama-panel px-4 py-2 border-amber-400/50 shadow-xl flex items-center gap-2 text-amber-200 font-bold text-sm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="hint-bubble-text">Cuba laluan lain!</span>
+      </div>
+    </div>
+
+    <!-- Title Screen -->
+    <div id="screen-title" class="absolute inset-0 bg-[#080914]/90 backdrop-blur-md z-40 flex flex-col items-center justify-between p-4 sm:p-6 transition-opacity duration-500 overflow-y-auto">
+      <div class="w-full flex justify-between items-center max-w-3xl pt-2">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-purple-600/30 border border-purple-400/50 flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#a78bfa">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <span class="text-xs uppercase tracking-widest text-purple-300 font-bold">Kindy Klub Original</span>
+        </div>
+        <button id="title-btn-lang" class="btn-3d btn-dark-pill px-3 py-1.5 text-xs font-bold">BM / EN</button>
+      </div>
+
+      <div class="flex flex-col items-center text-center my-auto max-w-lg w-full py-4">
+        <!-- Bobi Character Emblem -->
+        <div class="relative w-28 h-28 sm:w-36 sm:h-36 mb-2">
+          <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600/40 via-pink-500/20 to-cyan-400/40 blur-xl animate-pulse"></div>
+          <svg viewBox="0 0 160 160" class="w-full h-full relative z-10 filter drop-shadow-2xl">
+            <rect x="35" y="45" width="90" height="70" rx="30" fill="#1e1b4b" stroke="#a855f7" stroke-width="4" />
+            <path d="M45,55 Q80,45 115,55" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round" />
+            <rect x="46" y="58" width="68" height="42" rx="16" fill="#090a16" stroke="#4338ca" stroke-width="2.5" />
+            <ellipse cx="64" cy="78" rx="8" ry="11" fill="#38bdf8" filter="url(#glowFilter)" />
+            <ellipse cx="96" cy="78" rx="8" ry="11" fill="#38bdf8" filter="url(#glowFilter)" />
+            <circle cx="66" cy="75" r="3" fill="#ffffff" />
+            <circle cx="98" cy="75" r="3" fill="#ffffff" />
+            <circle cx="80" cy="22" r="10" fill="#fbbf24" stroke="#fef08a" stroke-width="3" filter="url(#glowFilter)" />
+            <path d="M80,26 L80,45" stroke="#a855f7" stroke-width="4" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <h1 id="title-game-name" class="text-3xl sm:text-5xl font-black tracking-tight text-white mb-1 drop-shadow-lg">
+          Misi Robot
+        </h1>
+        <p id="title-game-tagline" class="text-xs sm:text-base font-semibold text-purple-200 max-w-md drop-shadow">
+          Bantu robot meneroka dunia ajaib!
+        </p>
+
+        <!-- 3-Step Visual Instructions on Front Page -->
+        <div class="w-full max-w-sm sm:max-w-md my-3.5 p-3 sm:p-3.5 glass-diorama-panel border-purple-500/30 text-left">
+          <div class="flex items-center gap-2 mb-2 pb-1.5 border-b border-purple-500/20">
+            <div class="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-300">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <span class="text-xs uppercase tracking-wider font-black text-pink-300" data-i18n="frontInstructionsTitle">Arahan Mudah Main</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+            <!-- Step 1 -->
+            <div class="bg-black/40 rounded-xl p-2 border border-purple-500/20 flex flex-col items-center">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-cyan-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-300 mb-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </div>
+              <span class="text-[10px] sm:text-xs font-bold text-white block leading-tight" data-i18n="frontStep1Title">1. Susun Arahan</span>
+              <span class="text-[8px] sm:text-[10px] text-purple-300 font-medium leading-tight mt-0.5" data-i18n="frontStep1Desc">Anak panah dsb.</span>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-black/40 rounded-xl p-2 border border-purple-500/20 flex flex-col items-center">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/30 border border-amber-400/40 flex items-center justify-center text-amber-300 mb-1">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
+              <span class="text-[10px] sm:text-xs font-bold text-white block leading-tight" data-i18n="frontStep2Title">2. Tekan Main</span>
+              <span class="text-[8px] sm:text-[10px] text-purple-300 font-medium leading-tight mt-0.5" data-i18n="frontStep2Desc">Robot bergerak!</span>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-black/40 rounded-xl p-2 border border-purple-500/20 flex flex-col items-center">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-pink-600/30 border border-pink-400/40 flex items-center justify-center text-pink-300 mb-1">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+              <span class="text-[10px] sm:text-xs font-bold text-white block leading-tight" data-i18n="frontStep3Title">3. Capai Misi</span>
+              <span class="text-[8px] sm:text-[10px] text-purple-300 font-medium leading-tight mt-0.5" data-i18n="frontStep3Desc">Raikan kejayaan!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 w-full max-w-xs mt-1">
+          <button id="btn-start-adventure" class="btn-3d btn-play py-3 text-base sm:text-lg font-black">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span data-i18n="btnStartAdventure">Mula Pengembaraan</span>
+          </button>
+
+          <button id="btn-free-explore" class="btn-3d btn-action-purple py-2 text-sm sm:text-base font-bold">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+            <span data-i18n="btnExplore">Jelajah Dunia</span>
+          </button>
+
+          <div class="grid grid-cols-3 gap-1.5 mt-1">
+            <button id="btn-title-help" class="btn-3d btn-dark-pill py-2 text-xs font-bold text-pink-300">
+              <span data-i18n="howToPlayTitle">Cara Main</span>
+            </button>
+            <button id="btn-title-profile" class="btn-3d btn-dark-pill py-2 text-xs font-bold text-purple-300">
+              <span data-i18n="btnProfile">Profil</span>
+            </button>
+            <button id="btn-title-collection" class="btn-3d btn-dark-pill py-2 text-xs font-bold text-amber-300">
+              <span data-i18n="btnCollection">Koleksi</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="text-center text-xs text-purple-400/80 font-medium py-2">
+        Kinder Klub | All Rights Reserved
+      </footer>
+    </div>
+
+    <!-- Modal Complete -->
+    <div id="modal-complete" class="fixed inset-0 bg-[#080914]/85 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4">
+      <div class="glass-diorama-panel max-w-sm w-full p-6 text-center flex flex-col items-center border-amber-400/40">
+        <div class="w-24 h-24 mb-3 relative flex items-center justify-center">
+          <div class="absolute inset-0 bg-amber-400/30 rounded-full blur-xl animate-pulse"></div>
+          <svg viewBox="0 0 100 100" class="w-20 h-20 filter drop-shadow-lg star-float">
+            <polygon points="50,5 64,34 96,39 73,62 78,94 50,79 22,94 27,62 4,39 36,34" fill="url(#goldStarGrad)" stroke="#fef08a" stroke-width="4" filter="url(#glowFilter)" />
+          </svg>
+        </div>
+
+        <h2 id="complete-headline" class="text-3xl font-black text-white mb-1">Misi Berjaya!</h2>
+        <p id="complete-subtext" class="text-sm font-medium text-purple-200 mb-6">Robot sangat gembira dengan bantuan anda!</p>
+
+        <button id="btn-next-mission" class="btn-3d btn-play w-full py-3.5 text-base font-black">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M5 3l14 9-14 9V3z"/>
+          </svg>
+          <span data-i18n="btnNewMission">Misi Baharu</span>
+        </button>
+      </div>
+      <footer class="mt-6 text-xs text-purple-400/80 font-medium">
+        Kinder Klub | All Rights Reserved
+      </footer>
+    </div>
+
+    <!-- Modal Profile -->
+    <div id="modal-profile" class="fixed inset-0 bg-[#080914]/90 backdrop-blur-md z-50 hidden flex-col items-center justify-between p-4 overflow-y-auto">
+      <div class="w-full max-w-md pt-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-black text-white flex items-center gap-2" data-i18n="profileTitle">
+            Profil Pemain
+          </h2>
+          <button id="btn-close-profile" class="btn-3d btn-dark-pill w-10 h-10 !rounded-xl p-0 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="glass-diorama-panel p-5 flex flex-col gap-4 text-sm">
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-bold text-purple-300 mb-1" data-i18n="studentProfile">
+              Profil Murid
+            </label>
+            <input type="text" id="input-student-name" class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-2.5 text-white font-bold placeholder-purple-400/40 focus:outline-none focus:border-amber-400" placeholder="Nama murid..." />
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-bold text-purple-300 mb-1" data-i18n="familyCode">
+              Kod Keluarga
+            </label>
+            <input type="text" id="input-family-code" class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-2.5 text-white font-bold placeholder-purple-400/40 focus:outline-none focus:border-amber-400" placeholder="" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <div class="bg-black/30 rounded-xl p-3 border border-purple-500/20">
+              <span class="text-xs text-purple-300 font-semibold block" data-i18n="statGames">Permainan Dimainkan</span>
+              <span id="stat-games-val" class="text-xl font-black text-amber-300">0</span>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3 border border-purple-500/20">
+              <span class="text-xs text-purple-300 font-semibold block" data-i18n="statCompleted">Misi Selesai</span>
+              <span id="stat-completed-val" class="text-xl font-black text-cyan-300">0</span>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3 border border-purple-500/20">
+              <span class="text-xs text-purple-300 font-semibold block" data-i18n="statActions">Tindakan Betul</span>
+              <span id="stat-actions-val" class="text-xl font-black text-pink-300">0</span>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3 border border-purple-500/20">
+              <span class="text-xs text-purple-300 font-semibold block" data-i18n="statAccuracy">Ketepatan</span>
+              <span id="stat-accuracy-val" class="text-xl font-black text-emerald-300">100%</span>
+            </div>
+          </div>
+
+          <div class="pt-1">
+            <span class="text-xs uppercase tracking-wider font-bold text-purple-300 block mb-1" data-i18n="statRecent">Aktiviti Terkini</span>
+            <div id="profile-recent-log" class="text-xs text-slate-300 bg-black/30 rounded-xl p-3 border border-purple-500/20">
+              Belum ada aktiviti direkodkan.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="py-4 text-xs text-purple-400/80 font-medium">
+        Kinder Klub | All Rights Reserved
+      </footer>
+    </div>
+
+    <!-- Modal Collection -->
+    <div id="modal-collection" class="fixed inset-0 bg-[#080914]/90 backdrop-blur-md z-50 hidden flex-col items-center justify-between p-4 overflow-y-auto">
+      <div class="w-full max-w-md pt-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-black text-white" data-i18n="collectionTitle">Koleksi</h2>
+          <button id="btn-close-collection" class="btn-3d btn-dark-pill w-10 h-10 !rounded-xl p-0 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pb-6">
+          <div class="glass-diorama-panel p-4 flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-950/80 border border-purple-500/30 flex items-center justify-center mb-2 shadow-inner">
+              <svg viewBox="0 0 60 60" class="w-12 h-12">
+                <rect x="12" y="15" width="36" height="28" rx="10" fill="#1e1b4b" stroke="#a78bfa" stroke-width="2" />
+                <ellipse cx="22" cy="28" rx="4" ry="6" fill="#38bdf8" />
+                <ellipse cx="38" cy="28" rx="4" ry="6" fill="#38bdf8" />
+                <circle cx="30" cy="8" r="4" fill="#fbbf24" />
+                <line x1="30" y1="10" x2="30" y2="15" stroke="#a78bfa" stroke-width="2" />
+              </svg>
+            </div>
+            <span class="font-bold text-sm text-white" data-i18n="itemRobot">Robot Bobi</span>
+            <span class="text-xs text-purple-300 font-medium" data-i18n="itemRobotDesc">Penjelajah berani</span>
+          </div>
+
+          <div class="glass-diorama-panel p-4 flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-950/80 border border-purple-500/30 flex items-center justify-center mb-2 shadow-inner">
+              <svg viewBox="0 0 60 60" class="w-12 h-12">
+                <polygon points="30,8 37,22 52,24 41,35 44,50 30,42 16,50 19,35 8,24 23,22" fill="url(#goldStarGrad)" stroke="#fef08a" stroke-width="2" />
+              </svg>
+            </div>
+            <span class="font-bold text-sm text-white" data-i18n="itemStar">Bintang Bercahaya</span>
+            <span class="text-xs text-purple-300 font-medium" data-i18n="itemStarDesc">Objek misi ajaib</span>
+          </div>
+
+          <div class="glass-diorama-panel p-4 flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-950/80 border border-purple-500/30 flex items-center justify-center mb-2 shadow-inner">
+              <svg viewBox="0 0 60 60" class="w-12 h-12">
+                <circle cx="30" cy="30" r="18" fill="#ec4899" stroke="#f472b6" stroke-width="2" />
+                <circle cx="24" cy="28" r="3" fill="#ffffff" />
+                <circle cx="36" cy="28" r="3" fill="#ffffff" />
+                <path d="M25,36 Q30,40 35,36" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" />
+              </svg>
+            </div>
+            <span class="font-bold text-sm text-white" data-i18n="itemNPC">Si Comel</span>
+            <span class="text-xs text-purple-300 font-medium" data-i18n="itemNPCDesc">Sahabat malam</span>
+          </div>
+
+          <div class="glass-diorama-panel p-4 flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-950/80 border border-purple-500/30 flex items-center justify-center mb-2 shadow-inner">
+              <svg viewBox="0 0 60 60" class="w-12 h-12">
+                <rect x="14" y="24" width="32" height="24" rx="6" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2" />
+                <path d="M14,24 C14,8 46,8 46,24 Z" fill="#ec4899" />
+                <circle cx="30" cy="36" r="6" fill="#fef08a" />
+              </svg>
+            </div>
+            <span class="font-bold text-sm text-white" data-i18n="itemHouse">Rumah Kubah</span>
+            <span class="text-xs text-purple-300 font-medium" data-i18n="itemHouseDesc">Tempat rehat selesa</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="py-4 text-xs text-purple-400/80 font-medium">
+        Kinder Klub | All Rights Reserved
+      </footer>
+    </div>
+
+    <!-- Modal Help -->
+    <div id="modal-help" class="fixed inset-0 bg-[#080914]/90 backdrop-blur-md z-50 hidden flex-col items-center justify-between p-4 overflow-y-auto">
+      <div class="w-full max-w-md pt-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-black text-white" data-i18n="howToPlayTitle">Cara Main</h2>
+          <button id="btn-close-help" class="btn-3d btn-dark-pill w-10 h-10 !rounded-xl p-0 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="glass-diorama-panel p-5 flex flex-col gap-4">
+          <p class="text-sm font-semibold text-purple-200" data-i18n="howToPlayIntro">
+            Pilih anak panah untuk bantu robot bergerak, kemudian tekan Mainkan!
+          </p>
+
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3 bg-black/40 p-3 rounded-2xl border border-purple-500/20">
+              <div class="w-12 h-12 rounded-xl bg-cyan-600/30 border border-cyan-400/50 flex items-center justify-center shrink-0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="3.2">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </div>
+              <div>
+                <span class="font-bold text-white text-sm block" data-i18n="step1Title">1. Pilih Anak Panah</span>
+                <span class="text-xs text-purple-300" data-i18n="step1Desc">Tekan simbol anak panah, Ambil atau Hantar.</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-black/40 p-3 rounded-2xl border border-purple-500/20">
+              <div class="w-12 h-12 rounded-xl bg-amber-600/30 border border-amber-400/50 flex items-center justify-center shrink-0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fbbf24">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
+              <div>
+                <span class="font-bold text-white text-sm block" data-i18n="step2Title">2. Tekan Mainkan</span>
+                <span class="text-xs text-purple-300" data-i18n="step2Desc">Saksikan robot bergerak mengikut susunan anda.</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-black/40 p-3 rounded-2xl border border-purple-500/20">
+              <div class="w-12 h-12 rounded-xl bg-pink-600/30 border border-pink-400/50 flex items-center justify-center shrink-0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#f472b6">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+              <div>
+                <span class="font-bold text-white text-sm block" data-i18n="step3Title">3. Misi Selesai</span>
+                <span class="text-xs text-purple-300" data-i18n="step3Desc">Bantu sahabat dan raikan kejayaan bersama robot!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="py-4 text-xs text-purple-400/80 font-medium">
+        Kinder Klub | All Rights Reserved
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    /* Global error suppressor to prevent iframe host error-boundary "something went wrong" */
+    window.onerror = function() { return true; };
+    window.addEventListener('error', function(e) { if (e && e.preventDefault) e.preventDefault(); return true; });
+    window.addEventListener('unhandledrejection', function(e) { if (e && e.preventDefault) e.preventDefault(); return true; });
+
+    /* Safe in-memory storage fallback */
+    const memoryStore = {};
+    const safeStorage = {
+      get(key) {
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            return window.localStorage.getItem(key);
+          }
+        } catch (e) {}
+        return memoryStore[key] || null;
+      },
+      set(key, val) {
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem(key, val);
+            return;
+          }
+        } catch (e) {}
+        memoryStore[key] = val;
+      }
+    };
+
+    const I18N = {
+      ms: {
+        gameTitle: "Misi Robot",
+        gameTagline: "Bantu robot meneroka dunia ajaib!",
+        frontInstructionsTitle: "Arahan Mudah Main",
+        frontStep1Title: "1. Susun Arahan",
+        frontStep1Desc: "Anak panah dsb.",
+        frontStep2Title: "2. Tekan Main",
+        frontStep2Desc: "Robot bergerak!",
+        frontStep3Title: "3. Capai Misi",
+        frontStep3Desc: "Raikan kejayaan!",
+        btnStartAdventure: "Mula Pengembaraan",
+        btnExplore: "Jelajah Dunia",
+        btnProfile: "Profil",
+        btnCollection: "Koleksi",
+        hudCurrentMission: "Misi Semasa",
+        cmdPickup: "Ambil",
+        cmdDeliver: "Hantar",
+        cmdClear: "Padam",
+        btnPlay: "Mainkan",
+        queuePlaceholder: "Pilih anak panah di bawah...",
+        hintTryOther: "Cuba laluan lain!",
+        missionCompleteHeadline: "Misi Berjaya!",
+        missionCompleteSubtext: "Robot sangat gembira dengan bantuan anda!",
+        btnNewMission: "Misi Baharu",
+        profileTitle: "Profil Pemain",
+        studentProfile: "Profil Murid",
+        familyCode: "Kod Keluarga",
+        statGames: "Permainan Dimainkan",
+        statCompleted: "Misi Selesai",
+        statActions: "Tindakan Betul",
+        statAccuracy: "Ketepatan",
+        statRecent: "Aktiviti Terkini",
+        recentEmpty: "Belum ada aktiviti direkodkan.",
+        recentActionDone: "Menyelesaikan misi di dunia ajaib!",
+        collectionTitle: "Koleksi",
+        itemRobot: "Robot Bobi",
+        itemRobotDesc: "Penjelajah berani",
+        itemStar: "Bintang Bercahaya",
+        itemStarDesc: "Objek misi ajaib",
+        itemNPC: "Si Comel",
+        itemNPCDesc: "Sahabat malam",
+        itemHouse: "Rumah Kubah",
+        itemHouseDesc: "Tempat rehat selesa",
+        howToPlayTitle: "Cara Main",
+        howToPlayIntro: "Pilih anak panah untuk bantu robot bergerak, kemudian tekan Mainkan!",
+        step1Title: "1. Pilih Anak Panah",
+        step1Desc: "Tekan simbol anak panah, Ambil atau Hantar.",
+        step2Title: "2. Tekan Mainkan",
+        step2Desc: "Saksikan robot bergerak mengikut susunan anda.",
+        step3Title: "3. Misi Selesai",
+        step3Desc: "Bantu sahabat dan raikan kejayaan bersama robot!",
+        missionObjective1: "Hantar bintang ke Rumah Kubah!",
+        missionObjective2: "Bawa bateri kuasa ke Bengkel!",
+        missionObjective3: "Jumpa Si Comel di tepi Pokok Ajaib!",
+        missionObjective4: "Bawa bunga kristal kepada Si Comel!",
+        labelWorkshop: "Bengkel",
+        labelHouse: "Rumah Kubah",
+        labelNPC: "Si Comel",
+        inputStudentPlaceholder: "Nama murid...",
+        cmdUpTitle: "Atas",
+        cmdDownTitle: "Bawah",
+        cmdLeftTitle: "Kiri",
+        cmdRightTitle: "Kanan",
+        tokenRemoveTitle: "Tekan untuk padam",
+        camFitTitle: "Lihat Semua Peta",
+        camFocusTitle: "Fokus Robot",
+        camZoomInTitle: "Zum Masuk",
+        camZoomOutTitle: "Zum Keluar",
+        freeExploreHud: "Jelajah dan berseronok!"
+      },
+      en: {
+        gameTitle: "Robot Mission",
+        gameTagline: "Help the robot explore the magical world!",
+        frontInstructionsTitle: "How to Play Guide",
+        frontStep1Title: "1. Queue Steps",
+        frontStep1Desc: "Arrow icons, etc.",
+        frontStep2Title: "2. Press Play",
+        frontStep2Desc: "Robot will move!",
+        frontStep3Title: "3. Win Mission",
+        frontStep3Desc: "Celebrate together!",
+        btnStartAdventure: "Start Adventure",
+        btnExplore: "Explore World",
+        btnProfile: "Profile",
+        btnCollection: "Collection",
+        hudCurrentMission: "Current Mission",
+        cmdPickup: "Pick Up",
+        cmdDeliver: "Deliver",
+        cmdClear: "Clear",
+        btnPlay: "Play",
+        queuePlaceholder: "Choose arrows below...",
+        hintTryOther: "Try another path!",
+        missionCompleteHeadline: "Mission Complete!",
+        missionCompleteSubtext: "The robot is thrilled with your help!",
+        btnNewMission: "New Mission",
+        profileTitle: "Player Profile",
+        studentProfile: "Student Profile",
+        familyCode: "Family Code",
+        statGames: "Games Played",
+        statCompleted: "Missions Completed",
+        statActions: "Correct Actions",
+        statAccuracy: "Accuracy",
+        statRecent: "Recent Activity",
+        recentEmpty: "No activity recorded yet.",
+        recentActionDone: "Completed a mission in the magical world!",
+        collectionTitle: "Collection",
+        itemRobot: "Bobi the Robot",
+        itemRobotDesc: "Brave explorer",
+        itemStar: "Glowing Star",
+        itemStarDesc: "Magical mission item",
+        itemNPC: "Si Comel",
+        itemNPCDesc: "Night companion",
+        itemHouse: "Dome Cottage",
+        itemHouseDesc: "Cosy resting spot",
+        howToPlayTitle: "How to Play",
+        howToPlayIntro: "Choose arrows to help the robot move, then press Play!",
+        step1Title: "1. Choose Arrows",
+        step1Desc: "Press arrow icons, Pick Up, or Deliver.",
+        step2Title: "2. Press Play",
+        step2Desc: "Watch the robot follow your chosen sequence.",
+        step3Title: "3. Complete Mission",
+        step3Desc: "Help your friends and celebrate together!",
+        missionObjective1: "Deliver the star to the Dome Cottage!",
+        missionObjective2: "Bring the power battery to the Workshop!",
+        missionObjective3: "Visit Si Comel by the Magic Tree!",
+        missionObjective4: "Bring the crystal flower to Si Comel!",
+        labelWorkshop: "Workshop",
+        labelHouse: "Dome Cottage",
+        labelNPC: "Si Comel",
+        inputStudentPlaceholder: "Student name...",
+        cmdUpTitle: "Up",
+        cmdDownTitle: "Down",
+        cmdLeftTitle: "Left",
+        cmdRightTitle: "Right",
+        tokenRemoveTitle: "Click to remove",
+        camFitTitle: "Overview Map",
+        camFocusTitle: "Focus on Bobi",
+        camZoomInTitle: "Zoom In",
+        camZoomOutTitle: "Zoom Out",
+        freeExploreHud: "Explore and have fun!"
+      }
+    };
+
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+              this.ctx = new AudioContextClass();
+            }
+          } catch (e) {
+            this.ctx = null;
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          try {
+            const p = this.ctx.resume();
+            if (p && typeof p.catch === 'function') {
+              p.catch(() => {});
+            }
+          } catch (e) {}
+        }
+      }
+
+      playTone(freq, type = 'sine', duration = 0.12, gainPeak = 0.15) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainPeak, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      }
+
+      playStep() {
+        try {
+          this.playTone(320, 'triangle', 0.08, 0.1);
+          setTimeout(() => this.playTone(480, 'sine', 0.08, 0.08), 35);
+        } catch (e) {}
+      }
+
+      playClick() {
+        try {
+          this.playTone(440, 'triangle', 0.06, 0.12);
+        } catch (e) {}
+      }
+
+      playPickup() {
+        try {
+          [523, 659, 784].forEach((f, i) => {
+            setTimeout(() => this.playTone(f, 'sine', 0.15, 0.15), i * 70);
+          });
+        } catch (e) {}
+      }
+
+      playConfused() {
+        try {
+          this.playTone(350, 'sawtooth', 0.14, 0.08);
+          setTimeout(() => this.playTone(260, 'sawtooth', 0.18, 0.08), 120);
+        } catch (e) {}
+      }
+
+      playVictory() {
+        try {
+          [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+            setTimeout(() => this.playTone(f, 'triangle', 0.22, 0.18), i * 90);
+          });
+        } catch (e) {}
+      }
+    }
+
+    const audio = new SoundEngine();
+
+    const GRID_COLS = 7;
+    const GRID_ROWS = 4;
+    const ORIGIN_X = 520;
+    const ORIGIN_Y = 640;
+    const TILE_WIDTH = 220;
+    const TILE_HEIGHT = 140;
+
+    function gridToWorld(col, row) {
+      return {
+        x: ORIGIN_X + col * TILE_WIDTH,
+        y: ORIGIN_Y + row * TILE_HEIGHT
+      };
+    }
+
+    /* -------------------------------------------------------------
+       CAMERA SYSTEM: Pan (Drag), Pinch-to-Zoom, Auto-Fit Overview
+       ------------------------------------------------------------- */
+    const cam = {
+      x: 0,
+      y: 0,
+      scale: 0.55,
+      minScale: 0.28,
+      maxScale: 1.25,
+      isDragging: false,
+      hasMoved: false,
+      startX: 0,
+      startY: 0,
+      startCamX: 0,
+      startCamY: 0,
+      startPinchDist: 0,
+      startPinchScale: 0.55,
+      activePointers: new Map()
+    };
+
+    function applyCameraTransform(animated = false) {
+      const stage = document.getElementById('world-stage');
+      if (!stage) return;
+      if (animated) {
+        stage.classList.add('smooth-cam');
+      } else {
+        stage.classList.remove('smooth-cam');
+      }
+      clampCameraBounds();
+      stage.style.transform = `translate3d(${cam.x}px, ${cam.y}px, 0) scale(${cam.scale})`;
+    }
+
+    function clampCameraBounds() {
+      const viewport = document.getElementById('world-viewport');
+      if (!viewport) return;
+      const vw = viewport.clientWidth;
+      const vh = viewport.clientHeight;
+      const stageW = 2400 * cam.scale;
+      const stageH = 1400 * cam.scale;
+
+      const marginX = vw * 0.45;
+      const marginY = vh * 0.45;
+
+      const minX = vw - stageW - marginX;
+      const maxX = marginX;
+      const minY = vh - stageH - marginY;
+      const maxY = marginY;
+
+      cam.x = Math.min(maxX, Math.max(minX, cam.x));
+      cam.y = Math.min(maxY, Math.max(minY, cam.y));
+    }
+
+    function fitOverview(animated = true) {
+      const viewport = document.getElementById('world-viewport');
+      if (!viewport) return;
+      const vw = viewport.clientWidth;
+      const vh = viewport.clientHeight;
+
+      // Entire diorama playfield bound box
+      const playW = 1620;
+      const playH = 720;
+      const centerX = 1180;
+      const centerY = 850;
+
+      const availW = vw * 0.92;
+      const availH = Math.max(260, vh - (vw < 640 ? 250 : 210));
+
+      const scaleX = availW / playW;
+      const scaleY = availH / playH;
+      let targetScale = Math.min(scaleX, scaleY);
+      targetScale = Math.min(0.95, Math.max(0.32, targetScale));
+
+      cam.scale = targetScale;
+      cam.x = (vw / 2) - (centerX * cam.scale);
+      const verticalOffset = vw < 640 ? -35 : -15;
+      cam.y = (vh / 2) - (centerY * cam.scale) + verticalOffset;
+
+      applyCameraTransform(animated);
+    }
+
+    function centerCameraOn(worldX, worldY, animated = true) {
+      const viewport = document.getElementById('world-viewport');
+      if (!viewport) return;
+      const vw = viewport.clientWidth;
+      const vh = viewport.clientHeight;
+
+      // Use comfortable zoom for focus
+      let targetScale = vw < 640 ? 0.72 : 0.88;
+      cam.scale = targetScale;
+
+      cam.x = (vw / 2) - (worldX * cam.scale);
+      const verticalOffset = vw < 640 ? 35 : 20;
+      cam.y = (vh / 2) - (worldY * cam.scale) + verticalOffset;
+
+      applyCameraTransform(animated);
+    }
+
+    function zoomBy(factor, centerX = null, centerY = null) {
+      const viewport = document.getElementById('world-viewport');
+      if (!viewport) return;
+      const vw = viewport.clientWidth;
+      const vh = viewport.clientHeight;
+
+      const cx = centerX !== null ? centerX : vw / 2;
+      const cy = centerY !== null ? centerY : vh / 2;
+
+      const oldScale = cam.scale;
+      const newScale = Math.min(cam.maxScale, Math.max(cam.minScale, oldScale * factor));
+      if (newScale === oldScale) return;
+
+      const worldPointX = (cx - cam.x) / oldScale;
+      const worldPointY = (cy - cam.y) / oldScale;
+
+      cam.scale = newScale;
+      cam.x = cx - (worldPointX * newScale);
+      cam.y = cy - (worldPointY * newScale);
+
+      applyCameraTransform(true);
+    }
+
+    const MISSION_TEMPLATES = [
+      {
+        id: 'visit_sicomel',
+        textKey: 'missionObjective3',
+        targetType: 'tree_sicomel',
+        needsItem: false,
+        itemType: null
+      },
+      {
+        id: 'flower_to_sicomel',
+        textKey: 'missionObjective4',
+        targetType: 'tree_sicomel',
+        needsItem: true,
+        itemType: 'flower'
+      },
+      {
+        id: 'star_to_house',
+        textKey: 'missionObjective1',
+        targetType: 'house',
+        needsItem: true,
+        itemType: 'star'
+      },
+      {
+        id: 'battery_to_workshop',
+        textKey: 'missionObjective2',
+        targetType: 'workshop',
+        needsItem: true,
+        itemType: 'battery'
+      }
+    ];
+
+    const STORAGE_KEY = 'kinderKlub_misiRobot_playerProfile';
+
+    let state = {
+      lang: 'ms',
+      audioEnabled: true,
+      mode: 'title',
+      robot: {
+        col: 1,
+        row: 2,
+        isCarrying: false,
+        isExecuting: false
+      },
+      mission: {
+        id: 1,
+        templateId: 'visit_sicomel',
+        textKey: 'missionObjective3',
+        targetType: 'tree_sicomel',
+        needsItem: false,
+        itemType: null,
+        startCol: 1,
+        startRow: 2,
+        itemCol: -1,
+        itemRow: -1,
+        goalCol: 4,
+        goalRow: 1,
+        hasItemBeenPicked: false,
+        isFinished: false
+      },
+      commandQueue: [],
+      profile: {
+        studentName: "",
+        familyCode: "",
+        gamesPlayed: 0,
+        missionsCompleted: 0,
+        correctActions: 0,
+        totalActions: 0,
+        recentActivity: ""
+      }
+    };
+
+    function loadSavedProfile() {
+      try {
+        const raw = safeStorage.get(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.profile = Object.assign(state.profile, parsed);
+          const nameEl = document.getElementById('input-student-name');
+          const codeEl = document.getElementById('input-family-code');
+          if (nameEl && parsed.studentName) nameEl.value = parsed.studentName;
+          if (codeEl && parsed.familyCode) codeEl.value = parsed.familyCode;
+          if (parsed.lang) state.lang = parsed.lang;
+        }
+      } catch (e) {}
+      updateProfileUI();
+    }
+
+    function saveProfile() {
+      try {
+        safeStorage.set(STORAGE_KEY, JSON.stringify({
+          studentName: state.profile.studentName,
+          familyCode: state.profile.familyCode,
+          gamesPlayed: state.profile.gamesPlayed,
+          missionsCompleted: state.profile.missionsCompleted,
+          correctActions: state.profile.correctActions,
+          totalActions: state.profile.totalActions,
+          recentActivity: state.profile.recentActivity,
+          lang: state.lang
+        }));
+      } catch (e) {}
+    }
+
+    function updateProfileUI() {
+      try {
+        const gEl = document.getElementById('stat-games-val');
+        const cEl = document.getElementById('stat-completed-val');
+        const aEl = document.getElementById('stat-actions-val');
+        const accEl = document.getElementById('stat-accuracy-val');
+        const recentEl = document.getElementById('profile-recent-log');
+
+        if (gEl) gEl.textContent = state.profile.gamesPlayed;
+        if (cEl) cEl.textContent = state.profile.missionsCompleted;
+        if (aEl) aEl.textContent = state.profile.correctActions;
+        
+        const acc = state.profile.totalActions > 0 
+          ? Math.round((state.profile.correctActions / state.profile.totalActions) * 100) 
+          : 100;
+        if (accEl) accEl.textContent = acc + '%';
+
+        if (recentEl) {
+          recentEl.textContent = state.profile.recentActivity || I18N[state.lang].recentEmpty;
+        }
+      } catch (e) {}
+    }
+
+    function buildPlayfieldSVGElements() {
+      const tilesContainer = document.getElementById('world-playfield-tiles');
+      const pathsContainer = document.getElementById('world-paths-layer');
+      if (!tilesContainer || !pathsContainer) return;
+      tilesContainer.innerHTML = '';
+      pathsContainer.innerHTML = '';
+
+      for (let r = 0; r < GRID_ROWS; r++) {
+        for (let c = 0; c < GRID_COLS; c++) {
+          const curr = gridToWorld(c, r);
+          if (c < GRID_COLS - 1) {
+            const next = gridToWorld(c + 1, r);
+            const pathLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            pathLine.setAttribute('x1', curr.x);
+            pathLine.setAttribute('y1', curr.y);
+            pathLine.setAttribute('x2', next.x);
+            pathLine.setAttribute('y2', next.y);
+            pathLine.setAttribute('stroke', 'url(#pathGlowGrad)');
+            pathLine.setAttribute('stroke-width', '18');
+            pathLine.setAttribute('stroke-linecap', 'round');
+            pathsContainer.appendChild(pathLine);
+          }
+          if (r < GRID_ROWS - 1) {
+            const next = gridToWorld(c, r + 1);
+            const pathLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            pathLine.setAttribute('x1', curr.x);
+            pathLine.setAttribute('y1', curr.y);
+            pathLine.setAttribute('x2', next.x);
+            pathLine.setAttribute('y2', next.y);
+            pathLine.setAttribute('stroke', 'url(#pathGlowGrad)');
+            pathLine.setAttribute('stroke-width', '18');
+            pathLine.setAttribute('stroke-linecap', 'round');
+            pathsContainer.appendChild(pathLine);
+          }
+        }
+      }
+
+      for (let r = 0; r < GRID_ROWS; r++) {
+        for (let c = 0; c < GRID_COLS; c++) {
+          const pt = gridToWorld(c, r);
+          const tileGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          tileGroup.setAttribute('transform', `translate(${pt.x}, ${pt.y})`);
+          tileGroup.setAttribute('class', 'grid-step-tile');
+          tileGroup.setAttribute('data-col', c);
+          tileGroup.setAttribute('data-row', r);
+
+          const under = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+          under.setAttribute('cx', 0);
+          under.setAttribute('cy', 24);
+          under.setAttribute('rx', 64);
+          under.setAttribute('ry', 24);
+          under.setAttribute('fill', 'url(#tileSideGrad)');
+          tileGroup.appendChild(under);
+
+          const topFace = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+          topFace.setAttribute('cx', 0);
+          topFace.setAttribute('cy', 8);
+          topFace.setAttribute('rx', 60);
+          topFace.setAttribute('ry', 22);
+          topFace.setAttribute('fill', 'url(#tileTopGrad)');
+          topFace.setAttribute('stroke', 'rgba(167, 139, 250, 0.4)');
+          topFace.setAttribute('stroke-width', '2.5');
+          tileGroup.appendChild(topFace);
+
+          const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          dot.setAttribute('cx', 0);
+          dot.setAttribute('cy', 8);
+          dot.setAttribute('r', 5);
+          dot.setAttribute('fill', '#a78bfa');
+          dot.setAttribute('opacity', '0.5');
+          tileGroup.appendChild(dot);
+
+          tilesContainer.appendChild(tileGroup);
+        }
+      }
+    }
+
+    function renderMissionElements() {
+      const layer = document.getElementById('mission-elements-layer');
+      if (!layer) return;
+      layer.innerHTML = '';
+
+      if (state.mode === 'title') return;
+
+      const goalPos = gridToWorld(state.mission.goalCol, state.mission.goalRow);
+      const goalGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      goalGroup.setAttribute('transform', `translate(${goalPos.x}, ${goalPos.y})`);
+
+      const currentLang = state.lang || 'ms';
+      const workshopText = I18N[currentLang].labelWorkshop || (currentLang === 'en' ? 'Workshop' : 'Bengkel');
+      const houseText = I18N[currentLang].labelHouse || (currentLang === 'en' ? 'Dome Cottage' : 'Rumah Kubah');
+      const npcText = I18N[currentLang].labelNPC || 'Si Comel';
+
+      if (state.mission.targetType === 'tree_sicomel') {
+        goalGroup.innerHTML = `
+          <ellipse cx="0" cy="18" rx="64" ry="24" fill="#38bdf8" opacity="0.32" class="animated-beacon" />
+          <circle cx="0" cy="10" r="46" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 5" opacity="0.8" />
+
+          <!-- Pokok Ajaib (Magic Glowing Tree) -->
+          <g transform="translate(-24, -28)">
+            <path d="M-8,45 Q-14,12 -6,-15 Q0,-32 6,-15 Q14,12 8,45 Z" fill="#2e1065" stroke="#7c3aed" stroke-width="2.5"/>
+            <circle cx="-16" cy="-35" r="34" fill="#065f46" opacity="0.92"/>
+            <circle cx="12" cy="-40" r="38" fill="#047857" opacity="0.95"/>
+            <circle cx="-2" cy="-62" r="32" fill="#10b981" filter="url(#glowFilter)" opacity="0.92"/>
+            <circle cx="-20" cy="-38" r="5" fill="#fef08a" filter="url(#glowFilter)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/></circle>
+            <circle cx="16" cy="-48" r="6" fill="#38bdf8" filter="url(#glowFilter)"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.5s" repeatCount="indefinite"/></circle>
+            <circle cx="0" cy="-72" r="5" fill="#f472b6" filter="url(#glowFilter)"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/></circle>
+          </g>
+
+          <!-- Si Comel NPC -->
+          <g id="npc-si-comel" transform="translate(34, -8)">
+            <ellipse cx="0" cy="22" rx="22" ry="8" fill="#080914" opacity="0.55"/>
+            <ellipse cx="0" cy="6" rx="23" ry="19" fill="#ec4899" stroke="#f472b6" stroke-width="2.5" />
+            <path d="M-10,-12 C-16,-34 -6,-42 -4,-20 Z" fill="#ec4899" stroke="#f472b6" stroke-width="2">
+              <animateTransform attributeName="transform" type="rotate" values="-4 -7 -14; 4 -7 -14; -4 -7 -14" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M10,-12 C16,-34 6,-42 4,-20 Z" fill="#ec4899" stroke="#f472b6" stroke-width="2">
+              <animateTransform attributeName="transform" type="rotate" values="4 7 -14; -4 7 -14; 4 7 -14" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <ellipse cx="-7" cy="-22" rx="2.5" ry="7" fill="#fbcfe8" />
+            <ellipse cx="7" cy="-22" rx="2.5" ry="7" fill="#fbcfe8" />
+            <ellipse cx="-8" cy="2" rx="4.5" ry="6" fill="#0f172a" />
+            <circle cx="-6.5" cy="0" r="2" fill="#ffffff" />
+            <circle cx="-9" cy="4" r="1" fill="#ffffff" />
+            <ellipse cx="8" cy="2" rx="4.5" ry="6" fill="#0f172a" />
+            <circle cx="9.5" cy="0" r="2" fill="#ffffff" />
+            <circle cx="7" cy="4" r="1" fill="#ffffff" />
+            <ellipse cx="-15" cy="8" rx="4.5" ry="2.5" fill="#fb7185" opacity="0.85" />
+            <ellipse cx="15" cy="8" rx="4.5" ry="2.5" fill="#fb7185" opacity="0.85" />
+            <path d="M-4,10 Q0,14 4,10" fill="none" stroke="#831843" stroke-width="2" stroke-linecap="round"/>
+            <g transform="translate(18, 6)">
+              <ellipse cx="0" cy="0" rx="6" ry="5" fill="#f472b6">
+                <animateTransform attributeName="transform" type="rotate" values="0 0 0; 32 0 0; -8 0 0; 0 0 0" dur="1.1s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+            <g transform="translate(0, -32)" class="star-float">
+              <circle cx="0" cy="0" r="12" fill="#1e1b4b" stroke="#f472b6" stroke-width="1.8" />
+              <path d="M0,4 C-4,0 -7,-3 -7,-6 C-7,-8.5 -4.5,-10.5 -2,-10.5 C-0.7,-10.5 0,-9.5 0,-8.5 C0,-9.5 0.7,-10.5 2,-10.5 C4.5,-10.5 7,-8.5 7,-6 C7,-3 4,0 0,4 Z" fill="#f43f5e" />
+            </g>
+            <rect x="-35" y="24" width="70" height="19" rx="9" fill="#1e1b4b" stroke="#f472b6" stroke-width="1.8"/>
+            <text x="0" y="37" text-anchor="middle" fill="#fdfaf3" font-size="10" font-weight="bold" font-family="'Fredoka', sans-serif">${npcText}</text>
+          </g>
+        `;
+      } else if (state.mission.targetType === 'workshop') {
+        goalGroup.innerHTML = `
+          <ellipse cx="0" cy="18" rx="60" ry="22" fill="#0284c7" opacity="0.35" class="animated-beacon" />
+          <g transform="translate(-10, -35)">
+            <ellipse cx="10" cy="55" rx="48" ry="16" fill="#080914" opacity="0.5"/>
+            <rect x="-35" y="5" width="90" height="50" rx="14" fill="url(#houseWallGrad)" stroke="#38bdf8" stroke-width="2.5" />
+            <polygon points="10,-24 -42,10 62,10" fill="url(#houseRoofGrad)" stroke="#f472b6" stroke-width="2.5" />
+            <g transform="translate(10, 30)">
+              <circle cx="0" cy="0" r="12" fill="#1e1b4b" stroke="#38bdf8" stroke-width="3" stroke-dasharray="7 5">
+                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="5s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="0" cy="0" r="4" fill="#fbbf24" />
+            </g>
+            <rect x="-28" y="58" width="76" height="18" rx="9" fill="#1e1b4b" stroke="#38bdf8" stroke-width="1.6"/>
+            <text x="10" y="70" text-anchor="middle" fill="#fdfaf3" font-size="10" font-weight="bold" font-family="'Fredoka', sans-serif">${workshopText}</text>
+          </g>
+        `;
+      } else {
+        goalGroup.innerHTML = `
+          <ellipse cx="0" cy="18" rx="60" ry="22" fill="#f43f5e" opacity="0.35" class="animated-beacon" />
+          <g transform="translate(-10, -40)">
+            <ellipse cx="10" cy="60" rx="46" ry="16" fill="#080914" opacity="0.5"/>
+            <rect x="-30" y="10" width="80" height="52" rx="16" fill="url(#houseWallGrad)" stroke="#a78bfa" stroke-width="2.5" />
+            <path d="M-30,16 C-30,-30 50,-30 50,16 Z" fill="url(#houseRoofGrad)" stroke="#f472b6" stroke-width="2.5" />
+            <circle cx="10" cy="36" r="14" fill="url(#windowGlow)" stroke="#fef08a" stroke-width="2.5" filter="url(#glowFilter)" />
+            <rect x="-30" y="64" width="80" height="18" rx="9" fill="#1e1b4b" stroke="#f472b6" stroke-width="1.6"/>
+            <text x="10" y="76" text-anchor="middle" fill="#fdfaf3" font-size="10" font-weight="bold" font-family="'Fredoka', sans-serif">${houseText}</text>
+          </g>
+        `;
+      }
+      layer.appendChild(goalGroup);
+
+      // Render Collectible Item on its tile if not yet picked
+      if (state.mission.needsItem && !state.mission.hasItemBeenPicked && state.mission.itemCol >= 0) {
+        const itemPos = gridToWorld(state.mission.itemCol, state.mission.itemRow);
+        const itemGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        itemGroup.setAttribute('id', 'world-item-group');
+        itemGroup.setAttribute('transform', `translate(${itemPos.x}, ${itemPos.y})`);
+
+        if (state.mission.itemType === 'flower') {
+          itemGroup.innerHTML = `
+            <ellipse cx="0" cy="16" rx="34" ry="12" fill="#000000" opacity="0.4" />
+            <g class="star-float" transform="translate(0, -6)">
+              <circle cx="0" cy="0" r="16" fill="url(#flowerPetalGrad)" filter="url(#glowFilter)" opacity="0.6"/>
+              <path d="M0,8 C-10,-4 -12,-16 0,-24 C12,-16 10,-4 0,8 Z" fill="url(#flowerPetalGrad)" stroke="#fbcfe8" stroke-width="2"/>
+              <path d="M-4,6 C-16,0 -20,-8 -12,-18 C-4,-14 0,0 -4,6 Z" fill="#ec4899" stroke="#fbcfe8" stroke-width="1.5"/>
+              <path d="M4,6 C16,0 20,-8 12,-18 C4,-14 0,0 4,6 Z" fill="#ec4899" stroke="#fbcfe8" stroke-width="1.5"/>
+              <circle cx="0" cy="-6" r="5" fill="#fef08a" stroke="#ffffff" stroke-width="1.5" filter="url(#glowFilter)"/>
+            </g>
+          `;
+        } else if (state.mission.itemType === 'battery') {
+          itemGroup.innerHTML = `
+            <ellipse cx="0" cy="16" rx="34" ry="12" fill="#000000" opacity="0.4" />
+            <g class="star-float" transform="translate(0, -10)">
+              <rect x="-14" y="-22" width="28" height="38" rx="8" fill="url(#batteryGrad)" stroke="#38bdf8" stroke-width="2.5" filter="url(#glowFilter)"/>
+              <rect x="-6" y="-26" width="12" height="5" rx="2" fill="#fbbf24"/>
+              <path d="M-2,-14 L4,-6 L-1,-6 L2,6 L-5,-2 L0,-2 Z" fill="#fef08a"/>
+            </g>
+          `;
+        } else {
+          itemGroup.innerHTML = `
+            <ellipse cx="0" cy="16" rx="34" ry="12" fill="#000000" opacity="0.4" />
+            <g class="star-float">
+              <polygon points="0,-24 7,-7 24,-7 11,5 16,24 0,12 -16,24 -11,5 -24,-7 -7,-7" fill="url(#goldStarGrad)" stroke="#fef08a" stroke-width="2.5" filter="url(#glowFilter)" />
+            </g>
+          `;
+        }
+        layer.appendChild(itemGroup);
+      }
+    }
+
+    function updateRobotVisualPose(animateStep = false, facingDir = 'right') {
+      const pos = gridToWorld(state.robot.col, state.robot.row);
+      const heroGroup = document.getElementById('robot-hero-group');
+      const carriedItem = document.getElementById('robot-carried-item');
+      if (!heroGroup) return;
+
+      heroGroup.style.transition = animateStep ? 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'transform 0.15s ease';
+      heroGroup.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+
+      if (carriedItem) {
+        if (state.robot.isCarrying) {
+          carriedItem.style.display = 'block';
+          if (state.mission.itemType === 'flower') {
+            carriedItem.innerHTML = `
+              <g class="star-float" transform="translate(0, 8)">
+                <path d="M0,6 C-8,-3 -10,-12 0,-18 C10,-12 8,-3 0,6 Z" fill="url(#flowerPetalGrad)" stroke="#fbcfe8" stroke-width="1.8"/>
+                <circle cx="0" cy="-5" r="4" fill="#fef08a" filter="url(#glowFilter)"/>
+              </g>
+            `;
+          } else if (state.mission.itemType === 'battery') {
+            carriedItem.innerHTML = `
+              <g class="star-float" transform="translate(0, 8)">
+                <rect x="-10" y="-16" width="20" height="26" rx="6" fill="url(#batteryGrad)" stroke="#38bdf8" stroke-width="2" filter="url(#glowFilter)"/>
+                <path d="M-1,-10 L3,-4 L-1,-4 L1,4 L-4,-1 L0,-1 Z" fill="#fef08a"/>
+              </g>
+            `;
+          } else {
+            carriedItem.innerHTML = `
+              <polygon points="0,-18 5,-5 18,-5 8,4 12,18 0,9 -12,18 -8,4 -18,-5 -5,-5" fill="url(#goldStarGrad)" stroke="#fef08a" stroke-width="2" filter="url(#glowFilter)" class="star-float" />
+            `;
+          }
+        } else {
+          carriedItem.style.display = 'none';
+        }
+      }
+
+      const bodyWrapper = document.getElementById('robot-body-wrapper');
+      const pupilL = document.getElementById('robot-pupil-left');
+      const pupilR = document.getElementById('robot-pupil-right');
+
+      if (bodyWrapper && pupilL && pupilR) {
+        if (facingDir === 'left') {
+          bodyWrapper.setAttribute('transform', 'scale(-1, 1)');
+          pupilL.setAttribute('cx', -17);
+          pupilL.setAttribute('cy', 0);
+          pupilR.setAttribute('cx', 15);
+          pupilR.setAttribute('cy', 0);
+        } else if (facingDir === 'right') {
+          bodyWrapper.setAttribute('transform', 'scale(1, 1)');
+          pupilL.setAttribute('cx', -13);
+          pupilL.setAttribute('cy', 0);
+          pupilR.setAttribute('cx', 19);
+          pupilR.setAttribute('cy', 0);
+        } else if (facingDir === 'up') {
+          bodyWrapper.setAttribute('transform', 'scale(0.97, 0.97) translate(0, -4)');
+          pupilL.setAttribute('cx', -15);
+          pupilL.setAttribute('cy', -4);
+          pupilR.setAttribute('cx', 17);
+          pupilR.setAttribute('cy', -4);
+        } else if (facingDir === 'down') {
+          bodyWrapper.setAttribute('transform', 'scale(1.03, 1.03) translate(0, 4)');
+          pupilL.setAttribute('cx', -15);
+          pupilL.setAttribute('cy', 3);
+          pupilR.setAttribute('cx', 17);
+          pupilR.setAttribute('cy', 3);
+        }
+      }
+
+      // If user is not zoomed out in overview, smoothly follow Bobi
+      if (cam.scale > 0.65) {
+        centerCameraOn(pos.x, pos.y, true);
+      }
+    }
+
+    function addCommandToQueue(cmd) {
+      if (state.robot.isExecuting) return;
+      if (state.commandQueue.length >= 12) return;
+
+      audio.playClick();
+      state.commandQueue.push(cmd);
+      renderQueueUI();
+    }
+
+    function removeCommandFromQueue(index) {
+      if (state.robot.isExecuting) return;
+      audio.playClick();
+      state.commandQueue.splice(index, 1);
+      renderQueueUI();
+    }
+
+    function clearCommandQueue() {
+      if (state.robot.isExecuting) return;
+      audio.playClick();
+      state.commandQueue = [];
+      renderQueueUI();
+    }
+
+    function renderQueueUI() {
+      const container = document.getElementById('command-queue-display');
+      const placeholder = document.getElementById('queue-placeholder-text');
+      if (!container) return;
+
+      if (state.commandQueue.length === 0) {
+        container.innerHTML = '';
+        if (placeholder) {
+          container.appendChild(placeholder);
+          placeholder.textContent = I18N[state.lang].queuePlaceholder;
+        }
+        return;
+      }
+
+      container.innerHTML = '';
+      state.commandQueue.forEach((cmd, idx) => {
+        const token = document.createElement('div');
+        token.className = 'command-token';
+        
+        let label = '';
+        let colorClasses = '';
+        let iconSvg = '';
+
+        if (cmd === 'up') {
+          colorClasses = 'bg-cyan-600 text-white border border-cyan-400';
+          iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
+        } else if (cmd === 'down') {
+          colorClasses = 'bg-cyan-700 text-white border border-cyan-400';
+          iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="5 12 12 19 19 12"></polyline></svg>';
+        } else if (cmd === 'left') {
+          colorClasses = 'bg-purple-600 text-white border border-purple-400';
+          iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>';
+        } else if (cmd === 'right') {
+          colorClasses = 'bg-purple-600 text-white border border-purple-400';
+          iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+        } else if (cmd === 'pickup') {
+          label = I18N[state.lang].cmdPickup;
+          colorClasses = 'bg-amber-600 text-white border border-amber-400 !px-3';
+          iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>';
+        } else if (cmd === 'deliver') {
+          label = I18N[state.lang].cmdDeliver;
+          colorClasses = 'bg-pink-600 text-white border border-pink-400 !px-3';
+          iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>';
+        }
+
+        token.className += ` ${colorClasses}`;
+        token.innerHTML = label ? `${iconSvg} <span>${label}</span>` : iconSvg;
+        token.title = I18N[state.lang].tokenRemoveTitle || "Click to remove";
+        token.addEventListener('click', () => removeCommandFromQueue(idx));
+        container.appendChild(token);
+      });
+
+      container.scrollLeft = container.scrollWidth;
+    }
+
+    async function executeCommandQueue() {
+      if (state.robot.isExecuting || state.commandQueue.length === 0) return;
+
+      state.robot.isExecuting = true;
+      audio.playTone(600, 'triangle', 0.15, 0.2);
+
+      const tray = document.getElementById('coding-tray-container');
+      if (tray) tray.classList.add('translate-y-24', 'opacity-60');
+
+      state.profile.gamesPlayed++;
+      saveProfile();
+      updateProfileUI();
+
+      for (let i = 0; i < state.commandQueue.length; i++) {
+        const cmd = state.commandQueue[i];
+
+        const tokens = document.querySelectorAll('.command-token');
+        tokens.forEach((t, idx) => {
+          t.style.filter = (idx === i) ? 'brightness(1.5) scale(1.1)' : 'brightness(0.85)';
+        });
+
+        await executeSingleCommand(cmd);
+        await new Promise(r => setTimeout(r, 450));
+      }
+
+      const reachedGoal = (state.robot.col === state.mission.goalCol && state.robot.row === state.mission.goalRow);
+      const deliveredProperly = state.mission.needsItem 
+        ? (state.mission.hasItemBeenPicked && !state.robot.isCarrying)
+        : true;
+
+      if (reachedGoal && (deliveredProperly || state.mode === 'free')) {
+        onMissionSuccess();
+      } else {
+        onMissionWrongRoute();
+      }
+
+      if (tray) tray.classList.remove('translate-y-24', 'opacity-60');
+      state.robot.isExecuting = false;
+      renderQueueUI();
+    }
+
+    async function executeSingleCommand(cmd) {
+      state.profile.totalActions++;
+
+      if (cmd === 'up') {
+        const nextRow = state.robot.row - 1;
+        if (nextRow >= 0) {
+          state.robot.row = nextRow;
+          audio.playStep();
+          state.profile.correctActions++;
+          updateRobotVisualPose(true, 'up');
+        } else {
+          audio.playConfused();
+          triggerBobiWiggle();
+        }
+      } else if (cmd === 'down') {
+        const nextRow = state.robot.row + 1;
+        if (nextRow < GRID_ROWS) {
+          state.robot.row = nextRow;
+          audio.playStep();
+          state.profile.correctActions++;
+          updateRobotVisualPose(true, 'down');
+        } else {
+          audio.playConfused();
+          triggerBobiWiggle();
+        }
+      } else if (cmd === 'left') {
+        const nextCol = state.robot.col - 1;
+        if (nextCol >= 0) {
+          state.robot.col = nextCol;
+          audio.playStep();
+          state.profile.correctActions++;
+          updateRobotVisualPose(true, 'left');
+        } else {
+          audio.playConfused();
+          triggerBobiWiggle();
+        }
+      } else if (cmd === 'right') {
+        const nextCol = state.robot.col + 1;
+        if (nextCol < GRID_COLS) {
+          state.robot.col = nextCol;
+          audio.playStep();
+          state.profile.correctActions++;
+          updateRobotVisualPose(true, 'right');
+        } else {
+          audio.playConfused();
+          triggerBobiWiggle();
+        }
+      } else if (cmd === 'pickup') {
+        if (!state.mission.hasItemBeenPicked && state.robot.col === state.mission.itemCol && state.robot.row === state.mission.itemRow) {
+          state.mission.hasItemBeenPicked = true;
+          state.robot.isCarrying = true;
+          audio.playPickup();
+          state.profile.correctActions++;
+          renderMissionElements();
+          updateRobotVisualPose(false, 'right');
+        } else {
+          audio.playConfused();
+          triggerBobiWiggle();
+        }
+      } else if (cmd === 'deliver') {
+        if (state.robot.isCarrying && state.robot.col === state.mission.goalCol && state.robot.row === state.mission.goalRow) {
+          state.robot.isCarrying = false;
+          audio.playVictory();
+          state.profile.correctActions++;
+          updateRobotVisualPose(false, 'right');
+        } else {
+          audio.playConfused();
+          triggerBobiWiggle();
+        }
+      }
+      saveProfile();
+    }
+
+    function triggerBobiWiggle() {
+      const head = document.getElementById('robot-head');
+      if (!head) return;
+      head.style.transform = 'translate(0, -32px) rotate(-14deg)';
+      setTimeout(() => {
+        head.style.transform = 'translate(0, -32px) rotate(14deg)';
+      }, 150);
+      setTimeout(() => {
+        head.style.transform = 'translate(0, -32px) rotate(0deg)';
+      }, 300);
+    }
+
+    function onMissionSuccess() {
+      audio.playVictory();
+      state.profile.missionsCompleted++;
+      state.profile.recentActivity = I18N[state.lang].recentActionDone;
+      saveProfile();
+      updateProfileUI();
+
+      const modal = document.getElementById('modal-complete');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function onMissionWrongRoute() {
+      audio.playConfused();
+      triggerBobiWiggle();
+
+      const bubble = document.getElementById('robot-hint-bubble');
+      if (bubble) {
+        bubble.style.left = '50%';
+        bubble.style.top = '35%';
+        bubble.style.transform = 'translate(-50%, -50%)';
+        const txt = document.getElementById('hint-bubble-text');
+        if (txt) txt.textContent = I18N[state.lang].hintTryOther;
+
+        bubble.classList.remove('opacity-0', '-translate-y-2');
+        bubble.classList.add('opacity-100', 'translate-y-0');
+
+        setTimeout(() => {
+          bubble.classList.remove('opacity-100', 'translate-y-0');
+          bubble.classList.add('opacity-0', '-translate-y-2');
+        }, 2600);
+      }
+    }
+
+    function generateNewMission() {
+      const tmplIndex = Math.floor(Math.random() * MISSION_TEMPLATES.length);
+      const tmpl = MISSION_TEMPLATES[tmplIndex];
+
+      const startC = Math.floor(Math.random() * 2);
+      const startR = 1 + Math.floor(Math.random() * 2);
+
+      let itemC = -1;
+      let itemR = -1;
+      let goalC = 4 + Math.floor(Math.random() * 3);
+      let goalR = Math.floor(Math.random() * GRID_ROWS);
+
+      if (tmpl.needsItem) {
+        itemC = 2 + Math.floor(Math.random() * 2);
+        itemR = Math.floor(Math.random() * GRID_ROWS);
+        if (itemC === goalC && itemR === goalR) {
+          goalC = (goalC < GRID_COLS - 1) ? goalC + 1 : goalC - 1;
+        }
+      } else {
+        goalC = 3 + Math.floor(Math.random() * 3);
+        goalR = 1 + Math.floor(Math.random() * 2);
+      }
+
+      state.mission = {
+        id: Date.now(),
+        templateId: tmpl.id,
+        textKey: tmpl.textKey,
+        targetType: tmpl.targetType,
+        needsItem: tmpl.needsItem,
+        itemType: tmpl.itemType,
+        startCol: startC,
+        startRow: startR,
+        itemCol: itemC,
+        itemRow: itemR,
+        goalCol: goalC,
+        goalRow: goalR,
+        hasItemBeenPicked: false,
+        isFinished: false
+      };
+
+      state.robot.col = startC;
+      state.robot.row = startR;
+      state.robot.isCarrying = false;
+      state.robot.isExecuting = false;
+      state.commandQueue = [];
+
+      const missionText = I18N[state.lang][tmpl.textKey];
+      const missionTxtEl = document.getElementById('hud-mission-text');
+      if (missionTxtEl) missionTxtEl.textContent = missionText;
+
+      renderMissionElements();
+      updateRobotVisualPose(false, 'right');
+      renderQueueUI();
+
+      // Automatically frame the entire map so child can see robot, item and destination!
+      fitOverview(true);
+    }
+
+    function switchLanguage(newLang) {
+      state.lang = newLang;
+      document.documentElement.lang = newLang;
+      const langLabel = document.getElementById('label-curr-lang');
+      if (langLabel) langLabel.textContent = newLang.toUpperCase();
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[newLang] && I18N[newLang][key]) {
+          el.textContent = I18N[newLang][key];
+        }
+      });
+
+      const setTxt = (id, str) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = str;
+      };
+
+      setTxt('title-game-name', I18N[newLang].gameTitle);
+      setTxt('title-game-tagline', I18N[newLang].gameTagline);
+      setTxt('hud-mission-type', I18N[newLang].hudCurrentMission);
+      setTxt('complete-headline', I18N[newLang].missionCompleteHeadline);
+      setTxt('complete-subtext', I18N[newLang].missionCompleteSubtext);
+      setTxt('hint-bubble-text', I18N[newLang].hintTryOther);
+      
+      const placeholder = document.getElementById('queue-placeholder-text');
+      if (placeholder) placeholder.textContent = I18N[newLang].queuePlaceholder;
+
+      // Update current mission HUD description dynamically
+      const missionTxtEl = document.getElementById('hud-mission-text');
+      if (missionTxtEl) {
+        if (state.mode === 'free') {
+          missionTxtEl.textContent = I18N[newLang].freeExploreHud;
+        } else if (state.mission && state.mission.textKey && I18N[newLang][state.mission.textKey]) {
+          missionTxtEl.textContent = I18N[newLang][state.mission.textKey];
+        }
+      }
+
+      // Update input placeholders
+      const sNameInput = document.getElementById('input-student-name');
+      if (sNameInput) sNameInput.placeholder = I18N[newLang].inputStudentPlaceholder;
+
+      // Update control tooltips and aria-labels
+      const setAttr = (id, title, aria) => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (title) el.title = title;
+          if (aria) el.setAttribute('aria-label', aria);
+        }
+      };
+
+      setAttr('btn-cam-fit', I18N[newLang].camFitTitle, I18N[newLang].camFitTitle);
+      setAttr('btn-cam-focus', I18N[newLang].camFocusTitle, I18N[newLang].camFocusTitle);
+      setAttr('btn-cam-zoom-in', I18N[newLang].camZoomInTitle, I18N[newLang].camZoomInTitle);
+      setAttr('btn-cam-zoom-out', I18N[newLang].camZoomOutTitle, I18N[newLang].camZoomOutTitle);
+
+      const setCmdAttr = (cmd, title) => {
+        const btn = document.querySelector(`.cmd-btn[data-command="${cmd}"]`);
+        if (btn) {
+          btn.title = title;
+          btn.setAttribute('aria-label', title);
+        }
+      };
+
+      setCmdAttr('up', I18N[newLang].cmdUpTitle);
+      setCmdAttr('down', I18N[newLang].cmdDownTitle);
+      setCmdAttr('left', I18N[newLang].cmdLeftTitle);
+      setCmdAttr('right', I18N[newLang].cmdRightTitle);
+      setCmdAttr('pickup', I18N[newLang].cmdPickup);
+      setCmdAttr('deliver', I18N[newLang].cmdDeliver);
+
+      // Re-render in-world destination badges with English labels (Workshop, Dome Cottage)
+      renderMissionElements();
+      renderQueueUI();
+      updateProfileUI();
+      saveProfile();
+    }
+
+    /* ------------------------------------------------------------------
+       GESTURE ENGINE: Smooth Pan & Pinch-to-Zoom for touch & mouse
+       ------------------------------------------------------------------ */
+    function setupViewportGestures() {
+      const viewport = document.getElementById('world-viewport');
+      if (!viewport) return;
+
+      function getPointersDistance(p1, p2) {
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      function getPointersMidpoint(p1, p2) {
+        return {
+          x: (p1.x + p2.x) / 2,
+          y: (p1.y + p2.y) / 2
+        };
+      }
+
+      viewport.addEventListener('pointerdown', (e) => {
+        // Ignore if clicking on UI buttons or coding tray
+        if (e.target.closest('#coding-tray-container, header, #floating-camera-controls, #robot-hint-bubble, .modal, #screen-title')) {
+          return;
+        }
+
+        cam.activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (cam.activePointers.size === 1) {
+          cam.isDragging = true;
+          cam.hasMoved = false;
+          cam.startX = e.clientX;
+          cam.startY = e.clientY;
+          cam.startCamX = cam.x;
+          cam.startCamY = cam.y;
+          // Disable CSS transition during manual drag for 60fps responsiveness
+          const stage = document.getElementById('world-stage');
+          if (stage) stage.classList.remove('smooth-cam');
+        } else if (cam.activePointers.size === 2) {
+          const ptrs = Array.from(cam.activePointers.values());
+          cam.startPinchDist = getPointersDistance(ptrs[0], ptrs[1]);
+          cam.startPinchScale = cam.scale;
+          cam.isDragging = false;
+        }
+      });
+
+      viewport.addEventListener('pointermove', (e) => {
+        if (!cam.activePointers.has(e.pointerId)) return;
+        cam.activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (cam.activePointers.size === 1 && cam.isDragging) {
+          const dx = e.clientX - cam.startX;
+          const dy = e.clientY - cam.startY;
+
+          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+            cam.hasMoved = true;
+          }
+
+          cam.x = cam.startCamX + dx;
+          cam.y = cam.startCamY + dy;
+          applyCameraTransform(false);
+        } else if (cam.activePointers.size === 2) {
+          const ptrs = Array.from(cam.activePointers.values());
+          const currentDist = getPointersDistance(ptrs[0], ptrs[1]);
+          if (cam.startPinchDist > 0) {
+            const factor = currentDist / cam.startPinchDist;
+            const mid = getPointersMidpoint(ptrs[0], ptrs[1]);
+            const newScale = Math.min(cam.maxScale, Math.max(cam.minScale, cam.startPinchScale * factor));
+
+            const worldX = (mid.x - cam.x) / cam.scale;
+            const worldY = (mid.y - cam.y) / cam.scale;
+
+            cam.scale = newScale;
+            cam.x = mid.x - (worldX * newScale);
+            cam.y = mid.y - (worldY * newScale);
+            applyCameraTransform(false);
+          }
+        }
+      });
+
+      const onPointerEnd = (e) => {
+        if (cam.activePointers.has(e.pointerId)) {
+          cam.activePointers.delete(e.pointerId);
+        }
+
+        if (cam.activePointers.size === 0) {
+          cam.isDragging = false;
+          // Re-enable smooth transition and clamp inside bounds
+          applyCameraTransform(true);
+        } else if (cam.activePointers.size === 1) {
+          const remaining = Array.from(cam.activePointers.values())[0];
+          cam.isDragging = true;
+          cam.startX = remaining.x;
+          cam.startY = remaining.y;
+          cam.startCamX = cam.x;
+          cam.startCamY = cam.y;
+        }
+      };
+
+      viewport.addEventListener('pointerup', onPointerEnd);
+      viewport.addEventListener('pointercancel', onPointerEnd);
+
+      // Desktop Mouse Wheel Zoom
+      viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.15 : 0.88;
+        zoomBy(factor, e.clientX, e.clientY);
+      }, { passive: false });
+
+      // Click to move in free-explore mode (only if not dragging/panning)
+      viewport.addEventListener('click', (e) => {
+        if (cam.hasMoved || state.mode !== 'free' || state.robot.isExecuting) return;
+        const targetTile = e.target.closest('.grid-step-tile');
+        if (targetTile) {
+          const c = parseInt(targetTile.getAttribute('data-col'));
+          const r = parseInt(targetTile.getAttribute('data-row'));
+          const facing = c < state.robot.col ? 'left' : (c > state.robot.col ? 'right' : (r < state.robot.row ? 'up' : 'down'));
+          state.robot.col = c;
+          state.robot.row = r;
+          audio.playStep();
+          updateRobotVisualPose(true, facing);
+        }
+      });
+    }
+
+    function setupEventListeners() {
+      const bindClick = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', fn);
+      };
+
+      bindClick('btn-toggle-lang', () => {
+        audio.playClick();
+        switchLanguage(state.lang === 'ms' ? 'en' : 'ms');
+      });
+      bindClick('title-btn-lang', () => {
+        audio.playClick();
+        switchLanguage(state.lang === 'ms' ? 'en' : 'ms');
+      });
+
+      bindClick('btn-toggle-audio', () => {
+        state.audioEnabled = !state.audioEnabled;
+        audio.enabled = state.audioEnabled;
+        const son = document.getElementById('icon-sound-on');
+        const soff = document.getElementById('icon-sound-off');
+        if (son) son.classList.toggle('hidden', !state.audioEnabled);
+        if (soff) soff.classList.toggle('hidden', state.audioEnabled);
+        if (state.audioEnabled) audio.playClick();
+      });
+
+      /* Floating Camera Controls */
+      bindClick('btn-cam-fit', () => {
+        audio.playClick();
+        fitOverview(true);
+      });
+
+      bindClick('btn-cam-focus', () => {
+        audio.playClick();
+        const pos = gridToWorld(state.robot.col, state.robot.row);
+        centerCameraOn(pos.x, pos.y, true);
+      });
+
+      bindClick('btn-cam-zoom-in', () => {
+        audio.playClick();
+        zoomBy(1.25);
+      });
+
+      bindClick('btn-cam-zoom-out', () => {
+        audio.playClick();
+        zoomBy(0.8);
+      });
+
+      document.querySelectorAll('.cmd-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cmd = btn.getAttribute('data-command');
+          addCommandToQueue(cmd);
+        });
+      });
+
+      bindClick('btn-clear-queue', clearCommandQueue);
+      bindClick('btn-play-run', executeCommandQueue);
+
+      bindClick('btn-start-adventure', () => {
+        audio.playClick();
+        const screen = document.getElementById('screen-title');
+        if (screen) screen.classList.add('opacity-0', 'pointer-events-none');
+        state.mode = 'mission';
+        generateNewMission();
+      });
+
+      bindClick('btn-free-explore', () => {
+        audio.playClick();
+        const screen = document.getElementById('screen-title');
+        if (screen) screen.classList.add('opacity-0', 'pointer-events-none');
+        state.mode = 'free';
+        generateNewMission();
+        const missionTxt = document.getElementById('hud-mission-text');
+        if (missionTxt) {
+          missionTxt.textContent = state.lang === 'ms' ? "Jelajah dan berseronok!" : "Explore and have fun!";
+        }
+      });
+
+      bindClick('btn-next-mission', () => {
+        audio.playClick();
+        const modal = document.getElementById('modal-complete');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+        generateNewMission();
+      });
+
+      const setupModal = (btnId, modalId, closeId) => {
+        bindClick(btnId, () => {
+          audio.playClick();
+          const m = document.getElementById(modalId);
+          if (m) {
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+          }
+        });
+        bindClick(closeId, () => {
+          audio.playClick();
+          const m = document.getElementById(modalId);
+          if (m) {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+          }
+        });
+      };
+
+      setupModal('btn-open-profile', 'modal-profile', 'btn-close-profile');
+      setupModal('btn-title-profile', 'modal-profile', 'btn-close-profile');
+      setupModal('btn-title-collection', 'modal-collection', 'btn-close-collection');
+      setupModal('btn-open-help', 'modal-help', 'btn-close-help');
+      setupModal('btn-title-help', 'modal-help', 'btn-close-help');
+
+      const sName = document.getElementById('input-student-name');
+      if (sName) {
+        sName.addEventListener('input', (e) => {
+          state.profile.studentName = e.target.value.trim();
+          saveProfile();
+        });
+      }
+
+      const fCode = document.getElementById('input-family-code');
+      if (fCode) {
+        fCode.addEventListener('input', (e) => {
+          state.profile.familyCode = e.target.value.trim();
+          saveProfile();
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        fitOverview(false);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      try {
+        buildPlayfieldSVGElements();
+        loadSavedProfile();
+        setupEventListeners();
+        setupViewportGestures();
+        switchLanguage(state.lang);
+        fitOverview(false);
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>
